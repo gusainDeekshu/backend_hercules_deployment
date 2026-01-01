@@ -21,7 +21,7 @@ const PORT = process.env.PORT || 5000;
 // Middleware
 app.use(cors({
   // Use specific origins to allow credentials (cookies/headers) securely
-  origin: ['http://localhost:3000', 'http://localhost:3001'], 
+  origin: ['http://localhost:3000', 'http://localhost:3001','https://admin-hercules-deployment.vercel.app','https://user-hercules-deployment.vercel.app'], 
   credentials: true
 }));
 app.use(express.json());
