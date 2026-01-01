@@ -1,0 +1,16 @@
+const express = require('express');
+const router = express.Router();
+const { protect } = require('../middleware/authMiddleware');
+const { getAll, getOne, createOne, updateOne, deleteOne } = require('../controllers/contentController');
+
+// Dynamic routes for all content types
+router.route('/:type')
+  .get(getAll)
+  .post(protect, createOne); // Protected
+
+router.route('/:type/:id')
+  .get(getOne)
+  .put(protect, updateOne)     // Protected
+  .delete(protect, deleteOne); // Protected
+
+module.exports = router;
