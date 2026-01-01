@@ -10,7 +10,7 @@ const contactRoutes = require('./routes/contactRoutes');
 const authRoutes = require('./routes/authRoutes'); 
 const contentRoutes = require('./routes/contentRoutes');
 const uploadRoutes = require('./routes/uploadRoutes'); // <--- 1. ADD THIS IMPORT
-const { errorHandler } = require('./middleware/errormiddleware');
+const { errorHandler } = require('./middleware/errmiddleware');
 
 // Connect to Database
 connectDB();

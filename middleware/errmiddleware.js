@@ -1,4 +1,4 @@
-//server\middleware\errorMiddleware.js
+//server\middleware\errmiddleware.js
 
 const errorHandler = (err, req, res, next) => {
   // Use the status code set in the controller, otherwise default to 500 (Server Error)
