@@ -2,93 +2,58 @@
 require('dotenv').config();
 const mongoose = require('mongoose');
 
-// 1. IMPORT MODELS
+// MODELS
 const ProductPage = require('./models/ProductPage');
 const ServicePage = require('./models/ServicePage');
 const Project = require('./models/Project');
 const Admin = require('./models/Admin');
 
-// 2. IMPORT MOCK DATA
-const db = require('./data/db'); // ← This is your updated database.js with productPages, servicePages, etc.
+// DATA
+const db = require('./data/db');
 
-// 3. SEED FUNCTION
 const importData = async () => {
   try {
-    // Connect to MongoDB
     await mongoose.connect(process.env.MONGO_URI);
-    console.log('Connected to MongoDB');
+    console.log('✅ MongoDB Connected');
 
-    // --- CLEAR EXISTING DATA ---
-    await ProductPage.deleteMany({});
-    await ServicePage.deleteMany({});
-    await Project.deleteMany({});
-    await Admin.deleteMany({});
-    console.log('Old data cleared');
+    // CLEAR OLD DATA
+    await ProductPage.deleteMany();
+    await ServicePage.deleteMany();
+    await Project.deleteMany();
+    await Admin.deleteMany();
+    console.log('🧹 Old data cleared');
 
-    // --- INSERT PRODUCT PAGES (Categories + Full Details) ---
-    // We insert the full detailed pages directly from productDetails
-    const productInserts = Object.keys(db.productDetails).map((slug) => {
-      const details = db.productDetails[slug];
+    // INSERT PRODUCT PAGES
+    if (db.productPages?.length) {
+      await ProductPage.insertMany(db.productPages);
+      console.log(`📦 Product Pages Imported (${db.productPages.length})`);
+    }
 
-      // Find matching category card from productPages array to get image, shortDescription, title
-      const categoryMatch = db.productPages.find((cat) => cat.slug === slug);
+    // INSERT SERVICE PAGES
+    if (db.servicePages?.length) {
+      await ServicePage.insertMany(db.servicePages);
+      console.log(`🛠 Service Pages Imported (${db.servicePages.length})`);
+    }
 
-      return {
-        slug,
-        title: categoryMatch?.title || details.pageTitle,
-        shortDescription: categoryMatch?.shortDescription || "Premium sports infrastructure solution",
-        image: categoryMatch?.image || details.heroImage || "/images/placeholder.jpg",
-        isFeatured: true, // All current ones are featured
-        pageTitle: details.pageTitle,
-        heroImage: details.heroImage,
-        intro: details.intro,
-        groups: details.groups,
-        createdAt: new Date(),
-      };
-    });
+    // INSERT PROJECTS
+    if (db.projects?.length) {
+      await Project.insertMany(db.projects);
+      console.log(`🏗 Projects Imported (${db.projects.length})`);
+    }
 
-    await ProductPage.insertMany(productInserts);
-    console.log(`Product Pages Imported (${productInserts.length})`);
-
-    // --- INSERT SERVICE PAGES ---
-    const serviceInserts = Object.keys(db.serviceDetails).map((slug) => {
-      const details = db.serviceDetails[slug];
-      const categoryMatch = db.servicePages.find((serv) => serv.slug === slug);
-
-      return {
-        slug,
-        pageTitle: details.pageTitle,
-        shortDescription: categoryMatch?.shortDescription || "Professional sports facility service",
-        image: categoryMatch?.image || details.heroImage || "/images/placeholder.jpg",
-        isFeatured: true,
-        heroImage: details.heroImage,
-        intro: details.intro,
-        groups: details.groups,
-        createdAt: new Date(),
-      };
-    });
-
-    await ServicePage.insertMany(serviceInserts);
-    console.log(`Service Pages Imported (${serviceInserts.length})`);
-
-    // --- INSERT PROJECTS ---
-    await Project.insertMany(db.projects);
-    console.log(`Projects Imported (${db.projects.length})`);
-
-    // --- CREATE ADMIN USER (password hashed automatically in model) ---
+    // CREATE ADMIN
     await Admin.create({
       username: 'admin',
-      password: 'password123', // Will be hashed via pre('save') middleware
+      password: 'password123',
     });
-    console.log('Admin User Created → username: admin | password: password123');
 
-    console.log('Database Seeded Successfully!');
+    console.log('🔐 Admin Created → admin / password123');
+    console.log('🎉 Database Seeded Successfully');
     process.exit(0);
   } catch (error) {
-    console.error(`Seeding Failed: ${error.message}`);
+    console.error('❌ Seeding Failed:', error);
     process.exit(1);
   }
 };
 
-// Run the seeder
 importData();

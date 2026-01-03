@@ -24,7 +24,6 @@ const getAllCategories = asyncHandler(async (req, res) => {
     ...s,
     type: 'service',
   }));
-console.log( formattedServices);
   res.status(200).json([
     ...formattedProducts,
     ...formattedServices,

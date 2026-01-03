@@ -9,24 +9,51 @@ const generateToken = (id) => {
 // @desc    Auth Admin & get token
 // @route   POST /api/auth/login
 exports.loginAdmin = async (req, res) => {
-  const { username, password } = req.body;
+  const { username } = req.body;
 
   try {
+    // console.log(`[ADMIN LOGIN] Attempt → username: ${username}`);
+
     const admin = await Admin.findOne({ username });
 
-    if (admin && (await admin.matchPassword(password))) {
-      res.json({
-        _id: admin._id,
-        username: admin.username,
-        token: generateToken(admin._id),
+    if (!admin) {
+      console.warn(
+        `[ADMIN LOGIN FAILED] User not found → username: ${username}`
+      );
+      return res.status(401).json({
+        message: 'Invalid username or password',
       });
-    } else {
-      res.status(401).json({ message: 'Invalid username or password' });
     }
+
+    const isMatch = await admin.matchPassword(req.body.password);
+
+    if (!isMatch) {
+      // console.warn(
+      //   `[ADMIN LOGIN FAILED] Incorrect password → username: ${username}`
+      // );
+      return res.status(401).json({
+        message: 'Invalid username or password',
+      });
+    }
+
+    // console.log(`[ADMIN LOGIN SUCCESS] username: ${username}`);
+
+    res.json({
+      _id: admin._id,
+      username: admin.username,
+      token: generateToken(admin._id),
+    });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.error(
+      `[ADMIN LOGIN ERROR] username: ${username} | error: ${error.message}`
+    );
+
+    res.status(500).json({
+      message: 'Server error during login',
+    });
   }
 };
+
 
 // @desc    Register a new Admin (Run this once via Postman to create your first admin)
 exports.registerAdmin = async (req, res) => {

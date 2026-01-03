@@ -22,7 +22,6 @@ exports.getAll = async (req, res) => {
 
   try {
     const items = await Model.find({}).sort({ createdAt: -1 });
-    console.log(items,"-----------------items");
     res.json(items);
   } catch (error) {
     res.status(500).json({ message: error.message });
