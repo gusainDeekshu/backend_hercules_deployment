@@ -7,5 +7,9 @@ router.get("/:type/:id", controller.getOne);
 router.post("/:type", controller.createOne);
 router.put("/:type/:id", controller.updateOne);
 router.delete("/:type/:id", controller.deleteOne);
+router.patch(
+  '/:type/:id/featured',
+  controller.toggleFeatured
+);
 
 module.exports = router;

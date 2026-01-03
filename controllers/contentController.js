@@ -84,3 +84,31 @@ exports.deleteOne = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
+// @desc    Toggle Featured Flag
+// @route   PATCH /api/content/:type/:id/featured
+exports.toggleFeatured = async (req, res) => {
+  const Model = getModel(req.params.type);
+  if (!Model) return res.status(400).json({ message: 'Invalid Resource Type' });
+
+  const { isFeatured } = req.body;
+
+  try {
+
+    if (isFeatured) {
+  const count = await Model.countDocuments({ isFeatured: true });
+  if (count >= 8) {
+    return res.status(400).json({ message: 'Max featured limit reached' });
+  }
+}
+    const item = await Model.findByIdAndUpdate(
+      req.params.id,
+      { isFeatured },
+      { new: true }
+    );
+
+    res.json(item);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
