@@ -11,7 +11,8 @@ const authRoutes = require('./routes/authRoutes');
 const contentRoutes = require('./routes/contentRoutes');
 const uploadRoutes = require('./routes/uploadRoutes'); // <--- 1. ADD THIS IMPORT
 const { errorHandler } = require('./middleware/errmiddleware');
-
+const serviceRoutes = require('./routes/serviceRoutes');
+const categoryRoutes = require('./routes/categoryRoutes');
 // Connect to Database
 connectDB();
 
@@ -30,7 +31,7 @@ app.use(express.json());
 
 // 1. Products (assuming productRoutes has /products)
 app.use('/api', productRoutes); 
-
+app.use('/api', categoryRoutes);
 // 2. Auth (Login/Register)
 app.use('/api/auth', authRoutes);
 
@@ -40,8 +41,10 @@ app.use('/api/content', contentRoutes);
 // 4. Contact & Inquiries 
 // FIXED: Mount at '/api' so the internal routes (/contact, /inquiries) work correctly
 app.use('/api', contactRoutes); 
+app.use('/api', serviceRoutes);
 // --- 2. REGISTER THE UPLOAD ROUTE ---
 app.use('/api/upload', uploadRoutes);
+
 // Health Check
 app.get('/', (req, res) => {
   res.send('Hercules Sports API is running...');

@@ -1,14 +1,23 @@
 const express = require('express');
 const router = express.Router();
-const { 
-  getCategories, 
-  getProductsBySlug, 
-  getServiceBySlug ,
-  getProjects
+
+const {
+  getHomeSections,
+  getProductPages,
+  getServicePages,
+  getProductBySlug,
+  getServiceBySlug,
+  getProjects,
 } = require('../controllers/productController');
 
-router.get('/categories', getCategories);
-router.get('/products/:slug', getProductsBySlug);
-router.get('/services/:slug', getServiceBySlug); // <--- New Route
-router.get('/projects', getProjects); // <--- New Route
+router.get('/home-sections', getHomeSections);
+
+router.get('/product-pages', getProductPages);
+router.get('/service-pages', getServicePages);
+
+router.get('/products/:slug', getProductBySlug);
+router.get('/services/:slug', getServiceBySlug);
+
+router.get('/projects', getProjects);
+
 module.exports = router;

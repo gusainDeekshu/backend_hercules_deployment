@@ -1,86 +1,118 @@
-// server/controllers/productController.js
 const asyncHandler = require('express-async-handler');
-const Category = require('../models/Category');
 const ProductPage = require('../models/ProductPage');
-const ServicePage = require('../models/ServicePage'); // <--- 1. IMPORT NEW MODEL
+const ServicePage = require('../models/ServicePage');
 const Project = require('../models/Project');
 
-// @desc    Get all categories (For Home Page & Products Page)
-// @route   GET /api/categories
-const getCategories = asyncHandler(async (req, res) => {
-  try {
-    const { type } = req.query;
-    let query = {};
+/*
+   HOME SECTIONS (FEATURED) */
+const getHomeSections = asyncHandler(async (req, res) => {
+  const [products, services] = await Promise.all([
+    ProductPage.find({ isFeatured: true })
+      .select('title slug image shortDescription')
+      .sort({ createdAt: -1 })
+      .limit(8)
+      .lean(),
 
-    // If frontend asks for ?type=service, filter by it.
-    if (type) {
-      query.type = type;
-    }
+    ServicePage.find({ isFeatured: true })
+      .select('title slug image shortDescription')
+      .sort({ createdAt: -1 })
+      .limit(8)
+      .lean(),
+  ]);
 
-    const categories = await Category.find(query);
-    res.status(200).json(categories);
-  } catch (error) {
-    res.status(500).json({ message: "Server Error fetching categories" });
-  }
+  const finalProducts =
+    products.length > 0
+      ? products
+      : await ProductPage.find({})
+          .select('title slug image shortDescription')
+          .sort({ createdAt: -1 })
+          .limit(6)
+          .lean();
+
+  const finalServices =
+    services.length > 0
+      ? services
+      : await ServicePage.find({})
+          .select('title slug image shortDescription')
+          .sort({ createdAt: -1 })
+          .limit(6)
+          .lean();
+
+  res.status(200).json({
+    products: finalProducts,
+    services: finalServices,
+  });
 });
 
-// @desc    Get detailed product page by slug
-// @route   GET /api/products/:slug
-const getProductsBySlug = asyncHandler(async (req, res) => {
-  const { slug } = req.params;
-  
-  try {
-    const productPage = await ProductPage.findOne({ slug: slug });
 
-    if (productPage) {
-      res.status(200).json(productPage);
-    } else {
-      res.status(404).json({ 
-        message: "Product page not found",
-        slug: slug 
-      });
-    }
-  } catch (error) {
-    console.error("Error fetching product page:", error);
-    res.status(500).json({ message: "Server Error fetching product details" });
-  }
+/*
+   ALL PRODUCT CATEGORIES */
+const getProductPages = asyncHandler(async (req, res) => {
+  const pages = await ProductPage.find({})
+    .select('title slug image shortDescription isFeatured')
+    .sort({ createdAt: -1 })
+    .lean();
+
+  res.status(200).json(pages);
 });
 
-// @desc    Get detailed service page by slug (For "Services" Page)
-// @route   GET /api/services/:slug
+
+/*
+   ALL SERVICE CATEGORIES */
+const getServicePages = asyncHandler(async (req, res) => {
+  const pages = await ServicePage.find({})
+    .select('title slug image shortDescription isFeatured')
+    .sort({ createdAt: -1 })
+    .lean();
+
+  res.status(200).json(pages);
+});
+
+
+/*
+   SINGLE PRODUCT CATEGORY */
+const getProductBySlug = asyncHandler(async (req, res) => {
+  const page = await ProductPage.findOne({ slug: req.params.slug })
+    .lean();
+
+  if (!page) {
+    return res.status(404).json({ message: 'Product category not found' });
+  }
+
+  page.groups = page.groups || [];
+
+  res.status(200).json(page);
+});
+
+
+/*
+   SINGLE SERVICE CATEGORY */
 const getServiceBySlug = asyncHandler(async (req, res) => {
-  const { slug } = req.params;
-  
-  try {
-    // 2. Query the ServicePage collection
-    const servicePage = await ServicePage.findOne({ slug: slug });
+  const page = await ServicePage.findOne({ slug: req.params.slug })
+    .lean();
 
-    if (servicePage) {
-      res.status(200).json(servicePage);
-    } else {
-      res.status(404).json({ 
-        message: "Service page not found",
-        slug: slug 
-      });
-    }
-  } catch (error) {
-    console.error("Error fetching service page:", error);
-    res.status(500).json({ message: "Server Error fetching service details" });
+  if (!page) {
+    return res.status(404).json({ message: 'Service category not found' });
   }
+
+  page.groups = page.groups || [];
+
+  res.status(200).json(page);
 });
 
+
+/*
+   PROJECTS */
 const getProjects = asyncHandler(async (req, res) => {
-  try {
-    const projects = await Project.find({});
-    res.status(200).json(projects);
-  } catch (error) {
-    res.status(500).json({ message: "Server Error fetching projects" });
-  }
+  const projects = await Project.find({}).lean();
+  res.status(200).json(projects);
 });
 
 module.exports = {
-  getCategories,
-  getProductsBySlug,
-  getServiceBySlug // <--- 3. EXPORT IT
-  ,getProjects
+  getHomeSections,
+  getProductPages,
+  getServicePages,
+  getProductBySlug,
+  getServiceBySlug,
+  getProjects,
 };
