@@ -12,7 +12,7 @@ exports.loginAdmin = async (req, res) => {
   const { username } = req.body;
 
   try {
-    // console.log(`[ADMIN LOGIN] Attempt → username: ${username}`);
+    console.log(`[ADMIN LOGIN] Attempt → username: ${username}`);
 
     const admin = await Admin.findOne({ username });
 
@@ -28,15 +28,15 @@ exports.loginAdmin = async (req, res) => {
     const isMatch = await admin.matchPassword(req.body.password);
 
     if (!isMatch) {
-      // console.warn(
-      //   `[ADMIN LOGIN FAILED] Incorrect password → username: ${username}`
-      // );
+      console.warn(
+        `[ADMIN LOGIN FAILED] Incorrect password → username: ${username}`
+      );
       return res.status(401).json({
         message: 'Invalid username or password',
       });
     }
 
-    // console.log(`[ADMIN LOGIN SUCCESS] username: ${username}`);
+    console.log(`[ADMIN LOGIN SUCCESS] username: ${username}`);
 
     res.json({
       _id: admin._id,
